@@ -1,0 +1,169 @@
+"""
+dynamic_env.py – Time-varying environment components.
+
+Implements:
+  WeatherSimulator  – first-order Markov chain over weather states
+  LightingSimulator – deterministic day/night cycle
+  TaskGenerator     – Poisson arrivals with random spatial placement
+"""
+
+from __future__ import annotations
+
+import math
+import random
+from typing import Dict, List
+
+from .config import SimulationConfig
+from .environment import TaskEnv
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Utilities
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _poisson_sample(rng: random.Random, lam: float) -> int:
+    """
+    Draw a single Poisson(lam) sample without numpy.
+    Uses Knuth's algorithm for lam ≤ 30, Normal approximation otherwise.
+    """
+    if lam <= 0:
+        return 0
+    if lam > 30:
+        return max(0, round(rng.gauss(lam, math.sqrt(lam))))
+    # Knuth
+    L = math.exp(-lam)
+    k, p = 0, 1.0
+    while p > L:
+        k += 1
+        p *= rng.random()
+    return k - 1
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Weather
+# ─────────────────────────────────────────────────────────────────────────────
+
+class WeatherSimulator:
+    """
+    First-order Markov chain over weather states.
+
+    State transitions are governed by SimulationConfig.weather_transitions.
+    Call .step() once per period to advance the chain.
+    """
+
+    def __init__(self, config: SimulationConfig, rng: random.Random) -> None:
+        self._transitions = config.weather_transitions
+        self._state = config.initial_weather
+        self._rng = rng
+        self._history: List[str] = [self._state]
+
+        # Validate that all destination states are also defined as source states
+        all_states = set(self._transitions.keys())
+        for src, row in self._transitions.items():
+            for dst in row:
+                if dst not in all_states:
+                    raise ValueError(
+                        f"Weather transition {src!r} → {dst!r}: "
+                        f"{dst!r} is not defined as a source state."
+                    )
+            s = sum(row.values())
+            if not math.isclose(s, 1.0, abs_tol=1e-6):
+                raise ValueError(
+                    f"Weather transition probabilities for {src!r} sum to {s:.6f}, not 1.0."
+                )
+
+    @property
+    def current(self) -> str:
+        return self._state
+
+    @property
+    def history(self) -> List[str]:
+        return list(self._history)
+
+    def step(self) -> str:
+        """Advance one period and return the new weather state."""
+        row = self._transitions[self._state]
+        states = list(row.keys())
+        weights = [row[s] for s in states]
+        self._state = self._rng.choices(states, weights=weights, k=1)[0]
+        self._history.append(self._state)
+        return self._state
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Lighting
+# ─────────────────────────────────────────────────────────────────────────────
+
+class LightingSimulator:
+    """
+    Deterministic lighting state from a repeating cycle.
+
+    lighting_cycle[period % len(lighting_cycle)] gives the state at `period`.
+    """
+
+    def __init__(self, config: SimulationConfig) -> None:
+        if not config.lighting_cycle:
+            raise ValueError("lighting_cycle must be non-empty.")
+        self._cycle = config.lighting_cycle
+
+    def get(self, period: int) -> str:
+        return self._cycle[period % len(self._cycle)]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Task generator
+# ─────────────────────────────────────────────────────────────────────────────
+
+class TaskGenerator:
+    """
+    Generates new task dicts at each period.
+
+    Each task is a plain dict with keys:
+        name           : unique string identifier
+        x, y           : coordinates in [0, grid_size]²
+        env            : TaskEnv(weather, lighting, road_domain)
+                         – weather and lighting reflect the period at arrival
+                         – road_domain is static for the task's lifetime
+        arrival_period : int period when the task entered the system
+    """
+
+    def __init__(self, config: SimulationConfig, rng: random.Random) -> None:
+        self._cfg = config
+        self._rng = rng
+        self._counter = 0
+
+        # Pre-normalise road weights once
+        domains = list(config.road_domain_weights.keys())
+        raw_w = [config.road_domain_weights[d] for d in domains]
+        total = sum(raw_w)
+        if total <= 0:
+            raise ValueError("road_domain_weights must have at least one positive entry.")
+        self._road_domains = domains
+        self._road_weights = [w / total for w in raw_w]
+
+    def generate(self, period: int, weather: str, lighting: str) -> List[dict]:
+        """
+        Return a (possibly empty) list of new task dicts for this period.
+        """
+        cfg = self._cfg
+        if cfg.tasks_per_period_fixed is not None:
+            n = int(cfg.tasks_per_period_fixed)
+        else:
+            n = _poisson_sample(self._rng, cfg.tasks_per_period_mean)
+
+        tasks: List[dict] = []
+        for _ in range(n):
+            self._counter += 1
+            road = self._rng.choices(self._road_domains, weights=self._road_weights, k=1)[0]
+            tasks.append({
+                "name": f"T{self._counter:05d}",
+                "x": self._rng.uniform(0.0, cfg.grid_size),
+                "y": self._rng.uniform(0.0, cfg.grid_size),
+                "env": TaskEnv(
+                    weather=weather,
+                    lighting=lighting,
+                    road_domain=road,
+                ),
+                "arrival_period": period,
+            })
+        return tasks
