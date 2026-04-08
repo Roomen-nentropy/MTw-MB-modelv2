@@ -1,0 +1,828 @@
+{
+  "config_snapshot": {
+    "total_periods": 24,
+    "planning_horizon_periods": 4,
+    "commitment_window_periods": 1,
+    "grid_size": 100.0,
+    "tasks_per_period_mean": 6.0,
+    "tasks_per_period_fixed": null,
+    "max_active_tasks": 120,
+    "road_domain_weights": {
+      "Highway": 0.28,
+      "Rural": 0.3,
+      "Urban": 0.42
+    },
+    "initial_weather": "Clear",
+    "weather_task_rate_multiplier": {
+      "Clear": 1.0,
+      "Rain": 1.08,
+      "Fog": 1.12
+    },
+    "weather_transitions": {
+      "Clear": {
+        "Clear": 0.7,
+        "Rain": 0.2,
+        "Fog": 0.1
+      },
+      "Rain": {
+        "Clear": 0.3,
+        "Rain": 0.6,
+        "Fog": 0.1
+      },
+      "Fog": {
+        "Clear": 0.4,
+        "Rain": 0.1,
+        "Fog": 0.5
+      }
+    },
+    "lighting_cycle": [
+      "Night",
+      "Night",
+      "Night",
+      "Night",
+      "Night",
+      "Night",
+      "Dusk",
+      "Dusk",
+      "Day",
+      "Day",
+      "Day",
+      "Day",
+      "Day",
+      "Day",
+      "Day",
+      "Day",
+      "Day",
+      "Day",
+      "Day",
+      "Day",
+      "Dusk",
+      "Dusk",
+      "Night",
+      "Night"
+    ],
+    "lighting_task_rate_multiplier": {
+      "Day": 1.0,
+      "Dusk": 1.05,
+      "Night": 1.1
+    },
+    "fleet": [
+      {
+        "name": "Standard",
+        "skill_k": 1,
+        "cost_multiplier": 1.0,
+        "num_available": 4,
+        "start_depot_idx": 0
+      },
+      {
+        "name": "Advanced",
+        "skill_k": 2,
+        "cost_multiplier": 1.5,
+        "num_available": 2,
+        "start_depot_idx": 0
+      }
+    ],
+    "depots": [
+      {
+        "name": "HQ",
+        "x": 50.0,
+        "y": 50.0
+      }
+    ],
+    "weather_score": {
+      "Clear": 0,
+      "Rain": 1,
+      "Fog": 2
+    },
+    "lighting_score": {
+      "Day": 0,
+      "Dusk": 1,
+      "Night": 2
+    },
+    "road_domain_score": {
+      "Highway": 0,
+      "Rural": 1,
+      "Urban": 2
+    },
+    "req_thresholds": [
+      2
+    ],
+    "req_levels": [
+      1,
+      2
+    ],
+    "solver_max_runtime": 4.0,
+    "solver_seed": 42,
+    "coord_scale": 1.0,
+    "cost_scale": 100.0,
+    "vehicle_fixed_cost_scale": 600.0,
+    "big_factor": 1000.0,
+    "random_seed": 0,
+    "verbose": true,
+    "save_results": true,
+    "results_dir": "simulation_results"
+  },
+  "total_periods": 24,
+  "total_tasks_generated": 163,
+  "total_tasks_dispatched": 162,
+  "total_tasks_remaining_at_end": 1,
+  "total_tasks_ever_deferred": 0,
+  "total_route_cost": 773200.0,
+  "total_solve_time_s": 96.05327680020127,
+  "wall_time_s": 96.34731629991438,
+  "feasible_periods": 24,
+  "infeasible_periods": 0,
+  "avg_tasks_generated_per_period": 6.791666666666667,
+  "avg_tasks_dispatched_per_period": 6.75,
+  "avg_route_cost_per_feasible_period": 32216.666666666668,
+  "avg_solve_time_per_period_s": 4.002219866675053,
+  "avg_cost_per_dispatched_task": 4772.83950617284,
+  "backlog_ratio_at_end": 0.006134969325153374,
+  "weather_period_counts": {
+    "Clear": 22,
+    "Rain": 1,
+    "Fog": 1
+  },
+  "period_results": [
+    {
+      "period": 0,
+      "weather": "Clear",
+      "lighting": "Night",
+      "tasks_in_pool": 9,
+      "tasks_dispatched": 8,
+      "tasks_deferred": 0,
+      "tasks_remaining": 1,
+      "solve_time_s": 4.0023,
+      "total_route_cost": 41700.0,
+      "pyvrp_feasible": true,
+      "routes": [
+        {
+          "vehicle_tier": "Advanced",
+          "num_tasks": 8,
+          "task_names": [
+            "T00007",
+            "T00005",
+            "T00009",
+            "T00004",
+            "T00008",
+            "T00006",
+            "T00003",
+            "T00002"
+          ],
+          "route_distance": 276.0
+        }
+      ]
+    },
+    {
+      "period": 1,
+      "weather": "Clear",
+      "lighting": "Night",
+      "tasks_in_pool": 3,
+      "tasks_dispatched": 2,
+      "tasks_deferred": 0,
+      "tasks_remaining": 1,
+      "solve_time_s": 4.001,
+      "total_route_cost": 16800.0,
+      "pyvrp_feasible": true,
+      "routes": [
+        {
+          "vehicle_tier": "Advanced",
+          "num_tasks": 2,
+          "task_names": [
+            "T00011",
+            "T00010"
+          ],
+          "route_distance": 110.0
+        }
+      ]
+    },
+    {
+      "period": 2,
+      "weather": "Clear",
+      "lighting": "Night",
+      "tasks_in_pool": 7,
+      "tasks_dispatched": 6,
+      "tasks_deferred": 0,
+      "tasks_remaining": 1,
+      "solve_time_s": 4.0016,
+      "total_route_cost": 33600.0,
+      "pyvrp_feasible": true,
+      "routes": [
+        {
+          "vehicle_tier": "Advanced",
+          "num_tasks": 6,
+          "task_names": [
+            "T00016",
+            "T00013",
+            "T00014",
+            "T00015",
+            "T00017",
+            "T00012"
+          ],
+          "route_distance": 222.0
+        }
+      ]
+    },
+    {
+      "period": 3,
+      "weather": "Clear",
+      "lighting": "Night",
+      "tasks_in_pool": 12,
+      "tasks_dispatched": 11,
+      "tasks_deferred": 0,
+      "tasks_remaining": 1,
+      "solve_time_s": 4.0016,
+      "total_route_cost": 46200.0,
+      "pyvrp_feasible": true,
+      "routes": [
+        {
+          "vehicle_tier": "Advanced",
+          "num_tasks": 11,
+          "task_names": [
+            "T00018",
+            "T00027",
+            "T00022",
+            "T00026",
+            "T00028",
+            "T00020",
+            "T00019",
+            "T00021",
+            "T00025",
+            "T00024",
+            "T00023"
+          ],
+          "route_distance": 306.0
+        }
+      ]
+    },
+    {
+      "period": 4,
+      "weather": "Clear",
+      "lighting": "Night",
+      "tasks_in_pool": 6,
+      "tasks_dispatched": 5,
+      "tasks_deferred": 0,
+      "tasks_remaining": 1,
+      "solve_time_s": 4.0009,
+      "total_route_cost": 33550.0,
+      "pyvrp_feasible": true,
+      "routes": [
+        {
+          "vehicle_tier": "Standard",
+          "num_tasks": 1,
+          "task_names": [
+            "T00031"
+          ],
+          "route_distance": 106.0
+        },
+        {
+          "vehicle_tier": "Advanced",
+          "num_tasks": 4,
+          "task_names": [
+            "T00033",
+            "T00030",
+            "T00032",
+            "T00029"
+          ],
+          "route_distance": 151.0
+        }
+      ]
+    },
+    {
+      "period": 5,
+      "weather": "Clear",
+      "lighting": "Night",
+      "tasks_in_pool": 8,
+      "tasks_dispatched": 7,
+      "tasks_deferred": 0,
+      "tasks_remaining": 1,
+      "solve_time_s": 4.001,
+      "total_route_cost": 37200.0,
+      "pyvrp_feasible": true,
+      "routes": [
+        {
+          "vehicle_tier": "Advanced",
+          "num_tasks": 7,
+          "task_names": [
+            "T00037",
+            "T00036",
+            "T00040",
+            "T00035",
+            "T00034",
+            "T00039",
+            "T00038"
+          ],
+          "route_distance": 246.0
+        }
+      ]
+    },
+    {
+      "period": 6,
+      "weather": "Clear",
+      "lighting": "Dusk",
+      "tasks_in_pool": 5,
+      "tasks_dispatched": 4,
+      "tasks_deferred": 0,
+      "tasks_remaining": 1,
+      "solve_time_s": 4.0013,
+      "total_route_cost": 27750.0,
+      "pyvrp_feasible": true,
+      "routes": [
+        {
+          "vehicle_tier": "Advanced",
+          "num_tasks": 4,
+          "task_names": [
+            "T00041",
+            "T00044",
+            "T00042",
+            "T00043"
+          ],
+          "route_distance": 183.0
+        }
+      ]
+    },
+    {
+      "period": 7,
+      "weather": "Clear",
+      "lighting": "Dusk",
+      "tasks_in_pool": 10,
+      "tasks_dispatched": 9,
+      "tasks_deferred": 0,
+      "tasks_remaining": 1,
+      "solve_time_s": 4.0013,
+      "total_route_cost": 45450.0,
+      "pyvrp_feasible": true,
+      "routes": [
+        {
+          "vehicle_tier": "Advanced",
+          "num_tasks": 9,
+          "task_names": [
+            "T00048",
+            "T00052",
+            "T00050",
+            "T00051",
+            "T00045",
+            "T00053",
+            "T00046",
+            "T00049",
+            "T00047"
+          ],
+          "route_distance": 301.0
+        }
+      ]
+    },
+    {
+      "period": 8,
+      "weather": "Clear",
+      "lighting": "Day",
+      "tasks_in_pool": 5,
+      "tasks_dispatched": 4,
+      "tasks_deferred": 0,
+      "tasks_remaining": 1,
+      "solve_time_s": 4.0013,
+      "total_route_cost": 24000.0,
+      "pyvrp_feasible": true,
+      "routes": [
+        {
+          "vehicle_tier": "Standard",
+          "num_tasks": 4,
+          "task_names": [
+            "T00054",
+            "T00056",
+            "T00055",
+            "T00057"
+          ],
+          "route_distance": 240.0
+        }
+      ]
+    },
+    {
+      "period": 9,
+      "weather": "Clear",
+      "lighting": "Day",
+      "tasks_in_pool": 4,
+      "tasks_dispatched": 3,
+      "tasks_deferred": 0,
+      "tasks_remaining": 1,
+      "solve_time_s": 4.0008,
+      "total_route_cost": 21100.0,
+      "pyvrp_feasible": true,
+      "routes": [
+        {
+          "vehicle_tier": "Standard",
+          "num_tasks": 3,
+          "task_names": [
+            "T00058",
+            "T00060",
+            "T00059"
+          ],
+          "route_distance": 211.0
+        }
+      ]
+    },
+    {
+      "period": 10,
+      "weather": "Rain",
+      "lighting": "Day",
+      "tasks_in_pool": 7,
+      "tasks_dispatched": 6,
+      "tasks_deferred": 0,
+      "tasks_remaining": 1,
+      "solve_time_s": 4.001,
+      "total_route_cost": 27000.0,
+      "pyvrp_feasible": true,
+      "routes": [
+        {
+          "vehicle_tier": "Advanced",
+          "num_tasks": 6,
+          "task_names": [
+            "T00061",
+            "T00066",
+            "T00064",
+            "T00062",
+            "T00063",
+            "T00065"
+          ],
+          "route_distance": 178.0
+        }
+      ]
+    },
+    {
+      "period": 11,
+      "weather": "Clear",
+      "lighting": "Day",
+      "tasks_in_pool": 6,
+      "tasks_dispatched": 5,
+      "tasks_deferred": 0,
+      "tasks_remaining": 1,
+      "solve_time_s": 4.0009,
+      "total_route_cost": 22000.0,
+      "pyvrp_feasible": true,
+      "routes": [
+        {
+          "vehicle_tier": "Standard",
+          "num_tasks": 5,
+          "task_names": [
+            "T00070",
+            "T00068",
+            "T00067",
+            "T00071",
+            "T00069"
+          ],
+          "route_distance": 220.0
+        }
+      ]
+    },
+    {
+      "period": 12,
+      "weather": "Clear",
+      "lighting": "Day",
+      "tasks_in_pool": 3,
+      "tasks_dispatched": 2,
+      "tasks_deferred": 0,
+      "tasks_remaining": 1,
+      "solve_time_s": 4.0225,
+      "total_route_cost": 8300.0,
+      "pyvrp_feasible": true,
+      "routes": [
+        {
+          "vehicle_tier": "Standard",
+          "num_tasks": 2,
+          "task_names": [
+            "T00072",
+            "T00073"
+          ],
+          "route_distance": 83.0
+        }
+      ]
+    },
+    {
+      "period": 13,
+      "weather": "Clear",
+      "lighting": "Day",
+      "tasks_in_pool": 7,
+      "tasks_dispatched": 6,
+      "tasks_deferred": 0,
+      "tasks_remaining": 1,
+      "solve_time_s": 4.0015,
+      "total_route_cost": 29400.0,
+      "pyvrp_feasible": true,
+      "routes": [
+        {
+          "vehicle_tier": "Standard",
+          "num_tasks": 6,
+          "task_names": [
+            "T00074",
+            "T00076",
+            "T00077",
+            "T00078",
+            "T00079",
+            "T00075"
+          ],
+          "route_distance": 294.0
+        }
+      ]
+    },
+    {
+      "period": 14,
+      "weather": "Clear",
+      "lighting": "Day",
+      "tasks_in_pool": 10,
+      "tasks_dispatched": 9,
+      "tasks_deferred": 0,
+      "tasks_remaining": 1,
+      "solve_time_s": 4.0013,
+      "total_route_cost": 32200.0,
+      "pyvrp_feasible": true,
+      "routes": [
+        {
+          "vehicle_tier": "Standard",
+          "num_tasks": 9,
+          "task_names": [
+            "T00082",
+            "T00084",
+            "T00086",
+            "T00085",
+            "T00080",
+            "T00088",
+            "T00087",
+            "T00083",
+            "T00081"
+          ],
+          "route_distance": 322.0
+        }
+      ]
+    },
+    {
+      "period": 15,
+      "weather": "Clear",
+      "lighting": "Day",
+      "tasks_in_pool": 14,
+      "tasks_dispatched": 13,
+      "tasks_deferred": 0,
+      "tasks_remaining": 1,
+      "solve_time_s": 4.0019,
+      "total_route_cost": 29800.0,
+      "pyvrp_feasible": true,
+      "routes": [
+        {
+          "vehicle_tier": "Standard",
+          "num_tasks": 13,
+          "task_names": [
+            "T00090",
+            "T00096",
+            "T00099",
+            "T00093",
+            "T00095",
+            "T00097",
+            "T00092",
+            "T00094",
+            "T00101",
+            "T00089",
+            "T00100",
+            "T00091",
+            "T00098"
+          ],
+          "route_distance": 298.0
+        }
+      ]
+    },
+    {
+      "period": 16,
+      "weather": "Clear",
+      "lighting": "Day",
+      "tasks_in_pool": 10,
+      "tasks_dispatched": 9,
+      "tasks_deferred": 0,
+      "tasks_remaining": 1,
+      "solve_time_s": 4.0018,
+      "total_route_cost": 32500.0,
+      "pyvrp_feasible": true,
+      "routes": [
+        {
+          "vehicle_tier": "Standard",
+          "num_tasks": 9,
+          "task_names": [
+            "T00103",
+            "T00108",
+            "T00106",
+            "T00105",
+            "T00110",
+            "T00104",
+            "T00107",
+            "T00109",
+            "T00102"
+          ],
+          "route_distance": 325.0
+        }
+      ]
+    },
+    {
+      "period": 17,
+      "weather": "Clear",
+      "lighting": "Day",
+      "tasks_in_pool": 8,
+      "tasks_dispatched": 7,
+      "tasks_deferred": 0,
+      "tasks_remaining": 1,
+      "solve_time_s": 4.0011,
+      "total_route_cost": 31500.0,
+      "pyvrp_feasible": true,
+      "routes": [
+        {
+          "vehicle_tier": "Standard",
+          "num_tasks": 7,
+          "task_names": [
+            "T00116",
+            "T00112",
+            "T00117",
+            "T00113",
+            "T00115",
+            "T00114",
+            "T00111"
+          ],
+          "route_distance": 315.0
+        }
+      ]
+    },
+    {
+      "period": 18,
+      "weather": "Fog",
+      "lighting": "Day",
+      "tasks_in_pool": 8,
+      "tasks_dispatched": 7,
+      "tasks_deferred": 0,
+      "tasks_remaining": 1,
+      "solve_time_s": 4.0015,
+      "total_route_cost": 44250.0,
+      "pyvrp_feasible": true,
+      "routes": [
+        {
+          "vehicle_tier": "Advanced",
+          "num_tasks": 7,
+          "task_names": [
+            "T00121",
+            "T00123",
+            "T00119",
+            "T00118",
+            "T00124",
+            "T00120",
+            "T00122"
+          ],
+          "route_distance": 293.0
+        }
+      ]
+    },
+    {
+      "period": 19,
+      "weather": "Clear",
+      "lighting": "Day",
+      "tasks_in_pool": 9,
+      "tasks_dispatched": 8,
+      "tasks_deferred": 0,
+      "tasks_remaining": 1,
+      "solve_time_s": 4.0011,
+      "total_route_cost": 34300.0,
+      "pyvrp_feasible": true,
+      "routes": [
+        {
+          "vehicle_tier": "Standard",
+          "num_tasks": 8,
+          "task_names": [
+            "T00128",
+            "T00129",
+            "T00126",
+            "T00132",
+            "T00125",
+            "T00130",
+            "T00131",
+            "T00127"
+          ],
+          "route_distance": 343.0
+        }
+      ]
+    },
+    {
+      "period": 20,
+      "weather": "Clear",
+      "lighting": "Dusk",
+      "tasks_in_pool": 11,
+      "tasks_dispatched": 10,
+      "tasks_deferred": 0,
+      "tasks_remaining": 1,
+      "solve_time_s": 4.0014,
+      "total_route_cost": 46200.0,
+      "pyvrp_feasible": true,
+      "routes": [
+        {
+          "vehicle_tier": "Advanced",
+          "num_tasks": 10,
+          "task_names": [
+            "T00142",
+            "T00140",
+            "T00135",
+            "T00136",
+            "T00133",
+            "T00141",
+            "T00139",
+            "T00138",
+            "T00134",
+            "T00137"
+          ],
+          "route_distance": 306.0
+        }
+      ]
+    },
+    {
+      "period": 21,
+      "weather": "Clear",
+      "lighting": "Dusk",
+      "tasks_in_pool": 7,
+      "tasks_dispatched": 6,
+      "tasks_deferred": 0,
+      "tasks_remaining": 1,
+      "solve_time_s": 4.001,
+      "total_route_cost": 23200.0,
+      "pyvrp_feasible": true,
+      "routes": [
+        {
+          "vehicle_tier": "Standard",
+          "num_tasks": 4,
+          "task_names": [
+            "T00147",
+            "T00144",
+            "T00148",
+            "T00146"
+          ],
+          "route_distance": 148.0
+        },
+        {
+          "vehicle_tier": "Advanced",
+          "num_tasks": 2,
+          "task_names": [
+            "T00143",
+            "T00145"
+          ],
+          "route_distance": 54.0
+        }
+      ]
+    },
+    {
+      "period": 22,
+      "weather": "Clear",
+      "lighting": "Night",
+      "tasks_in_pool": 8,
+      "tasks_dispatched": 7,
+      "tasks_deferred": 0,
+      "tasks_remaining": 1,
+      "solve_time_s": 4.0011,
+      "total_route_cost": 43050.0,
+      "pyvrp_feasible": true,
+      "routes": [
+        {
+          "vehicle_tier": "Advanced",
+          "num_tasks": 7,
+          "task_names": [
+            "T00155",
+            "T00153",
+            "T00152",
+            "T00151",
+            "T00154",
+            "T00149",
+            "T00150"
+          ],
+          "route_distance": 285.0
+        }
+      ]
+    },
+    {
+      "period": 23,
+      "weather": "Clear",
+      "lighting": "Night",
+      "tasks_in_pool": 9,
+      "tasks_dispatched": 8,
+      "tasks_deferred": 0,
+      "tasks_remaining": 1,
+      "solve_time_s": 4.002,
+      "total_route_cost": 42150.0,
+      "pyvrp_feasible": true,
+      "routes": [
+        {
+          "vehicle_tier": "Advanced",
+          "num_tasks": 8,
+          "task_names": [
+            "T00158",
+            "T00160",
+            "T00162",
+            "T00157",
+            "T00163",
+            "T00159",
+            "T00156",
+            "T00161"
+          ],
+          "route_distance": 279.0
+        }
+      ]
+    }
+  ]
+}

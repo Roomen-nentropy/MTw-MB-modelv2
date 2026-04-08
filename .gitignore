@@ -1,8 +1,0 @@
-
-__pycache__/
-**/__pycache__/
-*.py[cod]
-
-# Local simulation outputs/artifacts
-simulation_results/
-hf_mdbovrp/*.zip
