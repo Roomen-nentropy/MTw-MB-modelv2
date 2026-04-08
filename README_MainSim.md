@@ -33,81 +33,112 @@ Python 3.9+ recommended.
 ## Project Structure
 
 ```
-hf_mdbovrp/
-│
-├── main.py                  # Entry point — build model and run solver
-├── fleet.py                 # Vehicle class with skill_k and cost_multiplier_k
-├── tasks.py                 # Task/ticket class with environmental tuple and req_j
-├── compatibility.py         # Requirement mapping function + compatibility matrix builder
-├── cost_matrix.py           # Per-vehicle economic cost matrix builder
-├── model.py                 # PyVRP model construction and HGA configuration
-├── validate.py              # Post-solve compliance checker
-└── config.py                # Thresholds, penalty values, solver settings
+Simulation/
+├── hf_mdbovrp/
+│   ├── config.py                # Simulation and fleet/depot configuration dataclasses
+│   ├── dynamic_env.py           # Weather, lighting, task generation
+│   ├── environment.py           # Req mapping and compatibility logic
+│   ├── fleet.py                 # Vehicle tier definition
+│   ├── fleet_controlgroup.py    # Control-group fleet constructor
+│   ├── model_builder.py         # PyVRP model build + solve wrappers
+│   ├── rolling_horizon.py       # Period-by-period planning engine
+│   ├── simulation.py            # Main simulation orchestration + summaries
+│   └── __init__.py
+├── run_simulation.py            # Baseline simulation entry point
+├── run_controlgroup.py          # Control-group single-run entry point
+├── run_comparative_simulation.py# Paired A/B comparative study runner
+├── run_cost_optimization.py     # Parameter-sweep optimization runner
+└── run_demo.py                  # Small demo/legacy helper script
 ```
 
 ---
 
-## Quick Start
+## Quick Start (Baseline Run)
 
-```python
-from fleet import Vehicle
-from tasks import Task
-from compatibility import build_compatibility_matrix
-from cost_matrix import build_cost_matrix
-from model import build_and_solve
+```bash
+python run_simulation.py
+```
 
-# 1. Define your fleet
-vehicles = [
-    Vehicle(id=0, skill_k=1, cost_multiplier_k=1.0),   # Standard
-    Vehicle(id=1, skill_k=2, cost_multiplier_k=2.0),   # High-Fidelity
-]
+Edit parameters in `run_simulation.py` (fleet mix, task rates, weather transitions, solver runtime, etc.), then rerun.
 
-# 2. Define your tasks (tickets)
-tasks = [
-    Task(id=0, weather="Clear",  lighting="Day",   road_domain="Highway"),
-    Task(id=1, weather="Rain",   lighting="Night",  road_domain="Urban"),
-    Task(id=2, weather="Fog",    lighting="Dusk",   road_domain="Rural"),
-]
+---
 
-# 3. Provide your distance matrix (n_tasks × n_tasks, in metres or seconds)
-distance_matrix = ...  # your numpy array here
+## Experiment Runners
 
-# 4. Run
-solution = build_and_solve(vehicles, tasks, distance_matrix)
+### Baseline vs Control Group (single run)
+
+```bash
+python run_controlgroup.py
+```
+
+This keeps baseline settings and swaps fleet composition to a control-group construction.
+
+### Paired Comparative Study (same seed conditions, Fleet A vs Fleet B)
+
+```bash
+python run_comparative_simulation.py
+```
+
+Useful env options:
+
+```bash
+# quick / medium / full (default: medium)
+COMPARE_MODE=quick
+
+# optional explicit number of seeds
+COMPARE_SEEDS=5
+```
+
+Windows PowerShell example:
+
+```powershell
+$env:COMPARE_MODE='quick'; python run_comparative_simulation.py
+```
+
+### Cost Optimization Sweep
+
+```bash
+python run_cost_optimization.py
+```
+
+Fast smoke mode:
+
+```powershell
+$env:FAST_SWEEP='1'; python run_cost_optimization.py
 ```
 
 ---
 
 ## Core Concepts
 
-### Vehicle Tiers (`fleet.py`)
+### Vehicle Tiers (`hf_mdbovrp/fleet.py`)
 
 Each vehicle has two parameters:
 
 | Parameter | Type | Description |
 |---|---|---|
-| `skill_k` | `int` | Sensor capability tier. `1` = Standard, `2` = High-Fidelity |
-| `cost_multiplier_k` | `float` | Economic cost weight. `1.0` for standard, `>1.0` for high-end |
+| `skill_k` | `int` | Sensor capability tier. Higher means more capable tier. |
+| `cost_multiplier` | `float` | Economic cost weight. `1.0` for standard, `>1.0` for high-end |
 
 ```python
 @dataclass
-class Vehicle:
-    id: int
-    skill_k: int           # 1 or 2
-    cost_multiplier_k: float  # >= 1.0
+class VehicleTier:
+    name: str
+    skill_k: int
+    cost_multiplier: float
 ```
 
-### Task Requirement Mapping (`compatibility.py`)
+### Task Requirement Mapping (`hf_mdbovrp/environment.py`)
 
 Each task carries an environmental tuple `(weather, lighting, road_domain)`. The function `map_requirement()` converts this into a minimum skill level `req_j`:
 
 ```python
-def map_requirement(weather: str, lighting: str, road_domain: str) -> int:
-    score = weather_score[weather] + lighting_score[lighting] + domain_score[road_domain]
-    return 2 if score >= 2 else 1
+def compute_task_requirement_level(env: TaskEnv, mapping: TaskRequirementMapping) -> int:
+    s = mapping.score(env)
+    return mapping.req_from_score(s)
 ```
 
-Default scoring weights (edit in `config.py`):
+Default scoring weights (edit in `run_simulation.py` and/or `hf_mdbovrp/config.py`):
 
 | Dimension | Value | Score |
 |---|---|---|
@@ -117,7 +148,7 @@ Default scoring weights (edit in `config.py`):
 
 > **These thresholds are placeholders.** Calibrate them with your domain/legal team before running production jobs.
 
-### Compatibility Matrix (`compatibility.py`)
+### Compatibility Matrix (`hf_mdbovrp/environment.py`)
 
 ```python
 a[j][k] = 1  if vehicle[k].skill_k >= task[j].req_j
@@ -128,23 +159,23 @@ A `0` entry is a hard block — that vehicle will never be assigned that task, r
 
 Print and manually sanity-check this matrix before running the solver.
 
-### Economic Cost Matrix (`cost_matrix.py`)
+### Economic Cost Modeling (`hf_mdbovrp/model_builder.py`)
 
 ```python
-cost_matrix_k[i][j] = distance_matrix[i][j] * vehicle_k.cost_multiplier_k
+unit_distance_cost = round(tier.cost_multiplier * cost_scale)
 ```
 
-One cost matrix is generated per vehicle tier. PyVRP receives the appropriate matrix for each vehicle type. This forces the solver to prefer cheaper vehicles for routine tasks and only deploy expensive high-fidelity setups when the compatibility matrix requires it.
+PyVRP vehicle types receive tier-specific unit distance costs. This forces the solver to prefer cheaper tiers for routine tasks and reserve expensive tiers for harder cases.
 
 ### Hard Skill Constraint
 
-Enforced in the HGA via a large penalty on any assignment where `a[j][k] == 0`:
+Enforced via profile-specific prohibitive distances for incompatible task-tier edges in `model_builder.py`:
 
 ```python
-BIG_PENALTY = 1e9  # defined in config.py
+prohibitive_distance = max_base_dist * big_factor + 1
 ```
 
-If PyVRP's version supports native per-client vehicle filtering, use that instead (preferred). Check `model.py` for the current enforcement method.
+See `hf_mdbovrp/model_builder.py` for implementation details.
 
 ---
 
@@ -164,19 +195,11 @@ MAX_ITERATIONS  = 10_000     # HGA stopping criterion
 
 ---
 
-## Validating a Solution
+## Output and Results
 
-Always run the compliance check before accepting any output:
-
-```python
-from validate import validate_solution
-
-is_valid = validate_solution(solution, compatibility_matrix)
-# Prints any vehicle–task violations found
-# Returns True only if zero violations exist
-```
-
-Zero violations is a hard requirement. A solution with any compatibility violations must be discarded.
+- `run_simulation.py` and `run_controlgroup.py` print period and end-of-run summaries.
+- JSON results are saved when `save_results=True` to `results_dir` (default: `simulation_results`).
+- Comparative and optimization scripts print aggregate metrics directly in console.
 
 ---
 

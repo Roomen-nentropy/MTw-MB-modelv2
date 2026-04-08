@@ -27,6 +27,28 @@ from hf_mdbovrp.simulation import SimulationSummary, run_simulation
 from run_simulation import config as baseline_config
 
 
+def _cost_per_task(summary: SimulationSummary) -> float:
+    """
+    Return per-task cost in a schema-tolerant way.
+    """
+    # Why: older SimulationSummary schemas may not expose the precomputed field.
+    # Falling back to base totals avoids AttributeError and keeps the script usable.
+    if hasattr(summary, "avg_cost_per_dispatched_task"):
+        return float(summary.avg_cost_per_dispatched_task)
+    return float(summary.total_route_cost) / max(1, int(summary.total_tasks_dispatched))
+
+
+def _backlog_ratio(summary: SimulationSummary) -> float:
+    """
+    Return end-of-run backlog ratio in a schema-tolerant way.
+    """
+    # Why: support both old and new summary shapes so optimisation can run even
+    # if a user imports from an older module version.
+    if hasattr(summary, "backlog_ratio_at_end"):
+        return float(summary.backlog_ratio_at_end)
+    return float(summary.total_tasks_remaining_at_end) / max(1, int(summary.total_tasks_generated))
+
+
 def _build_candidate_configs(
     seeds: List[int],
     total_periods: int,
@@ -110,13 +132,13 @@ def _aggregate_by_policy(results: List[Tuple[str, SimulationSummary]]) -> List[d
                 # Why: direct objective for this study.
                 "avg_total_cost": mean(s.total_route_cost for s in summaries),
                 # Why: normalised cost KPI for fair comparison.
-                "avg_cost_per_task": mean(s.avg_cost_per_dispatched_task for s in summaries),
+                "avg_cost_per_task": mean(_cost_per_task(s) for s in summaries),
                 # Why: service guardrail so we do not accept low-cost under-delivery.
                 "avg_dispatch_rate": mean(
                     s.total_tasks_dispatched / max(1, s.total_tasks_generated) for s in summaries
                 ),
                 # Why: backlog is another guardrail against hidden service debt.
-                "avg_backlog_ratio": mean(s.backlog_ratio_at_end for s in summaries),
+                "avg_backlog_ratio": mean(_backlog_ratio(s) for s in summaries),
             }
         )
 
@@ -165,7 +187,7 @@ if __name__ == "__main__":
             f"[{i:>3d}/{len(candidates)}] {scenario_name:<36s} "
             f"cost={summary.total_route_cost:>10.1f} "
             f"dispatch={summary.total_tasks_dispatched / max(1, summary.total_tasks_generated):.3f} "
-            f"backlog={summary.backlog_ratio_at_end:.3f}"
+            f"backlog={_backlog_ratio(summary):.3f}"
         )
 
     table = _aggregate_by_policy(all_results)
@@ -178,7 +200,7 @@ if __name__ == "__main__":
     ]
     feasible.sort(key=lambda x: x["avg_cost_per_task"])
 
-    baseline_cost_per_task = mean(s.avg_cost_per_dispatched_task for s in baseline_runs)
+    baseline_cost_per_task = mean(_cost_per_task(s) for s in baseline_runs)
 
     print("\n=== Baseline (3-seed average) ===")
     print(f"dispatch_rate   : {baseline_dispatch_rate:.3f}")
