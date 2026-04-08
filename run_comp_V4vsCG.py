@@ -20,6 +20,21 @@ from v4_setup.fleet_controlgroup import build_control_group_fleet
 from v4_setup.simulation import SimulationSummary, run_simulation
 
 
+def _same_operating_assumptions(cfg_a, cfg_b) -> bool:
+    """
+    Verify V4 and control runs share identical non-fleet assumptions.
+    """
+    return (
+        cfg_a.weather_task_rate_multiplier == cfg_b.weather_task_rate_multiplier
+        and cfg_a.lighting_task_rate_multiplier == cfg_b.lighting_task_rate_multiplier
+        and cfg_a.weather_operating_cost_multiplier == cfg_b.weather_operating_cost_multiplier
+        and cfg_a.lighting_operating_cost_multiplier == cfg_b.lighting_operating_cost_multiplier
+        and cfg_a.vehicle_fixed_cost_scale == cfg_b.vehicle_fixed_cost_scale
+        and cfg_a.vehicle_fixed_cost_exponent == cfg_b.vehicle_fixed_cost_exponent
+        and cfg_a.overqualification_cost_penalty_per_level == cfg_b.overqualification_cost_penalty_per_level
+    )
+
+
 def _cost_per_task(summary: SimulationSummary) -> float:
     return float(summary.total_route_cost) / max(1, int(summary.total_tasks_dispatched))
 
@@ -95,6 +110,11 @@ if __name__ == "__main__":
             save_results=False,
         )
 
+        # Explicit fairness guard: only fleet composition differs between runs.
+        same_assumptions = _same_operating_assumptions(cfg_v4, cfg_cg)
+        if not same_assumptions:
+            raise ValueError("V4 vs control-group config mismatch: non-fleet assumptions differ.")
+
         summary_v4 = run_simulation(cfg_v4)
         summary_cg = run_simulation(cfg_cg)
 
@@ -123,6 +143,7 @@ if __name__ == "__main__":
             "delta_backlog_pct": _pct_change(_backlog_ratio(summary_cg), _backlog_ratio(summary_v4)),
             "same_generated": same_generated,
             "same_weather": same_weather,
+            "same_assumptions": same_assumptions,
         }
         rows.append(row)
 
@@ -155,6 +176,8 @@ if __name__ == "__main__":
 
     all_same_generated = all(r["same_generated"] for r in rows)
     all_same_weather = all(r["same_weather"] for r in rows)
+    all_same_assumptions = all(r["same_assumptions"] for r in rows)
     print("\n=== Pairing sanity checks ===")
+    print(f"operating assumptions matched: {all_same_assumptions}")
     print(f"tasks generated matched: {all_same_generated}")
     print(f"weather path matched   : {all_same_weather}")
