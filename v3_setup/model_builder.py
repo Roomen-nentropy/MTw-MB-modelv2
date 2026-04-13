@@ -88,9 +88,8 @@ def build_skill_based_pyvrp_model(
         unit_distance_cost = int(round(tier.cost_multiplier * cost_scale))
         if unit_distance_cost < 1:
             unit_distance_cost = 1
-        # Realism: higher-tier vehicles have non-travel setup overhead
-        # (calibration, specialist crew allocation, readiness checks).
-        fixed_cost = int(round(max(0.0, tier.cost_multiplier - 1.0) * vehicle_fixed_cost_scale))
+        # Post-v2 standard: objective uses equipment-weighted travel cost only.
+        fixed_cost = 0
 
         vehicle_type_objs.append(
             model.add_vehicle_type(

@@ -27,7 +27,6 @@ def _same_operating_assumptions(cfg_a, cfg_b) -> bool:
     return (
         cfg_a.weather_task_rate_multiplier == cfg_b.weather_task_rate_multiplier
         and cfg_a.lighting_task_rate_multiplier == cfg_b.lighting_task_rate_multiplier
-        and cfg_a.vehicle_fixed_cost_scale == cfg_b.vehicle_fixed_cost_scale
     )
 
 def _cost_per_task(summary: SimulationSummary) -> float:

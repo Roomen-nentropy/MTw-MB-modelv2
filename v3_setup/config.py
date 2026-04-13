@@ -251,9 +251,9 @@ class SimulationConfig:
 
     vehicle_fixed_cost_scale: float = 600.0
     """
-    Fixed deployment cost base per route/vehicle use.
-    A tier's fixed cost is scaled by (cost_multiplier - 1), so expensive tiers
-    carry higher setup overhead (driver prep, calibration, maintenance burden).
+    Legacy compatibility field.
+    Kept in config for backward compatibility, but ignored by the current
+    post-v2 objective (equipment-weighted travel cost only).
     """
 
     big_factor: float = 1000.0

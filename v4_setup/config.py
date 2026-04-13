@@ -92,11 +92,11 @@ class SimulationConfig:
     solver_seed: int = 42
     coord_scale: float = 1.0
     cost_scale: float = 100.0
+    # Legacy compatibility fields: kept for API stability, ignored by the
+    # current post-v2 objective (equipment-weighted travel cost only).
     vehicle_fixed_cost_scale: float = 600.0
     vehicle_fixed_cost_exponent: float = 2.0
-    # Why: specialist assets have nonlinear readiness/setup burden.
     overqualification_cost_penalty_per_level: float = 0.30
-    # Why: using high-end assets on low-req tickets increases avoidable spend.
     big_factor: float = 1000.0
 
     random_seed: int = 0

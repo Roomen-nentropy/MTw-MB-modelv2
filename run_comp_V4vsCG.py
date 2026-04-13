@@ -29,9 +29,6 @@ def _same_operating_assumptions(cfg_a, cfg_b) -> bool:
         and cfg_a.lighting_task_rate_multiplier == cfg_b.lighting_task_rate_multiplier
         and cfg_a.weather_operating_cost_multiplier == cfg_b.weather_operating_cost_multiplier
         and cfg_a.lighting_operating_cost_multiplier == cfg_b.lighting_operating_cost_multiplier
-        and cfg_a.vehicle_fixed_cost_scale == cfg_b.vehicle_fixed_cost_scale
-        and cfg_a.vehicle_fixed_cost_exponent == cfg_b.vehicle_fixed_cost_exponent
-        and cfg_a.overqualification_cost_penalty_per_level == cfg_b.overqualification_cost_penalty_per_level
     )
 
 

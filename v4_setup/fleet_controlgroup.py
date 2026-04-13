@@ -7,25 +7,25 @@ from .config import FleetTierConfig
 
 def build_control_group_fleet(base_fleet: List[FleetTierConfig]) -> List[FleetTierConfig]:
     """
-    Build a control-group fleet where every vehicle has the highest capability.
+    Build a control-group fleet with only the highest-capability vehicle type.
 
-    The returned fleet preserves:
-      - number of vehicles per original tier,
-      - depot assignment per original tier,
-    while replacing each tier's skill/cost with the highest-tier values.
+    The returned fleet is a single tier:
+      - skill/cost from the highest tier in base_fleet,
+      - total vehicle count equal to the sum of all base tiers,
+      - depot assignment from that highest tier.
     """
     if not base_fleet:
         raise ValueError("base_fleet must contain at least one tier.")
 
     highest_tier = max(base_fleet, key=lambda tier: tier.skill_k)
 
+    total_vehicles = sum(tier.num_available for tier in base_fleet)
     return [
         FleetTierConfig(
-            name=f"{tier.name}_Control",
+            name=f"{highest_tier.name}_Control",
             skill_k=highest_tier.skill_k,
             cost_multiplier=highest_tier.cost_multiplier,
-            num_available=tier.num_available,
-            start_depot_idx=tier.start_depot_idx,
+            num_available=total_vehicles,
+            start_depot_idx=highest_tier.start_depot_idx,
         )
-        for tier in base_fleet
     ]
