@@ -182,15 +182,3 @@ The coded artefact begins as **`hf_mdbovrp`**, the direct computational encoding
 
 For commands and file layout, see `README_MainSim.md`. For file-level iteration detail, see the version-specific process notes under each package.
 
----
-
-## References (thesis and implementation)
-
-- Morlock, M. (2024). MDBOVRP / balanced dynamic VRP baseline (thesis literature; see `README_MainSim.md`).
-- Wouda, N. A., et al. (2024). PyVRP and hybrid genetic solution framework (thesis citation).
-- Pillac, V., et al. (2013). Dynamic vehicle routing and rolling horizons.
-- Chand, S., et al. (2002). Model predictive control and related rolling-horizon ideas (thesis citation).
-- Stäblein (2026). Purpose-driven hardware and fleet heterogeneity (thesis citation).
-- ISO 26262 (functional safety context for ODD and validation, thesis).
-- PyVRP: [https://pyvrp.org/](https://pyvrp.org/)
-- Repository: `README_MainSim.md`; iteration logs in `v3_setup/`, `v4_setup/`, `v5_real_world_data/`, `v6_real_world_data/`.
