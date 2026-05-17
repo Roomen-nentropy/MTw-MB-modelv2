@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+.cache.sqlite
+*.sqlite
+
+# Large map / OSM assets (download locally; do not push to GitHub)
+v7/*.xz
+v7/planet_*.csv
+
+# Local / reference PDFs
+v7/*.pdf
