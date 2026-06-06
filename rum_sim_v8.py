@@ -39,7 +39,9 @@ def _ensure_weather_csv() -> str:
 def build_config() -> SimulationConfig:
     depot_x, depot_y = suggest_sindelfingen_depot_xy(str(MAP_XZ))
 
-    base_fleet = [
+    # Larger owned pool (10:8 Standard:Advanced) so deployment is not supply-limited
+    # on high-capability vehicles; the optimizer still picks the active subset.
+    owned_fleet = [
         FleetTierConfig("Standard", skill_k=1, cost_multiplier=1.0, num_available=10),
         FleetTierConfig("Advanced", skill_k=2, cost_multiplier=1.35, num_available=8),
     ]
@@ -64,7 +66,7 @@ def build_config() -> SimulationConfig:
         lighting_cycle=(["Night"] * 6 + ["Dusk"] * 2 + ["Day"] * 12 + ["Dusk"] * 2 + ["Night"] * 2),
         lighting_task_rate_multiplier={"Day": 1.00, "Dusk": 1.05, "Night": 1.10},
         lighting_operating_cost_multiplier={"Day": 1.00, "Dusk": 1.05, "Night": 1.10},
-        fleet=base_fleet,
+        fleet=owned_fleet,
         depots=[DepotConfig("MB_Sindelfingen", x=depot_x, y=depot_y)],
         weather_score={"Clear": 0, "Rain": 1, "Fog": 2},
         lighting_score={"Day": 0, "Dusk": 1, "Night": 2},
@@ -89,9 +91,9 @@ def build_config() -> SimulationConfig:
         deployment_min_dispatch_rate=0.92,
         deployment_max_backlog_ratio=0.08,
         deployment_eval_periods=24,
-        deployment_min_utilization=0.50,
+        deployment_min_utilization=0.0,
         deployment_max_utilization=1.0,
-        deployment_utilization_step=0.05,
+        deployment_utilization_step=1.0,
     )
 
 

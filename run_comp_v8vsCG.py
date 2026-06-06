@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from rum_sim_v8 import build_config
 from v8.deployment import choose_optimal_deployment
-from v8.fleet_controlgroup import build_control_group_fleet
+from v8.fleet_controlgroup import build_control_group_fleet, total_vehicles
 from v8.simulation import SimulationSummary, run_simulation
 
 
@@ -39,7 +39,7 @@ def _pct_change(new_value: float, base_value: float) -> float:
 
 if __name__ == "__main__":
     base = build_config()
-    mode = os.getenv("COMPARE_MODE", "medium").strip().lower()
+    mode = os.getenv("COMPARE_MODE", "quick").strip().lower()
     if mode not in {"quick", "medium", "full"}:
         mode = "medium"
 
@@ -59,6 +59,10 @@ if __name__ == "__main__":
     decision = choose_optimal_deployment(base, base.fleet)
     fleet_model = decision.deployed_fleet
     fleet_cg = build_control_group_fleet(fleet_model)
+    model_total = total_vehicles(fleet_model)
+    cg_total = total_vehicles(fleet_cg)
+    if model_total != cg_total:
+        raise RuntimeError(f"Fleet size mismatch: model={model_total}, control_group={cg_total}")
 
     print("=== Real-World Paired Comparison (v8): Model vs Control Group ===")
     print(f"mode         : {mode}")
@@ -74,10 +78,14 @@ if __name__ == "__main__":
     )
     print(f"owned fleet  : {[f'{t.name}(n={t.num_available},k={t.skill_k})' for t in base.fleet]}")
     print(
-        f"deployed     : {[f'{t.name}(n={t.num_available},k={t.skill_k})' for t in fleet_model]} "
-        f"(total={decision.deployed_total}/{decision.owned_total}, util={decision.utilization:.1%})"
+        f"model fleet  : {model_total} vehicles "
+        f"({', '.join(f'{t.name}={t.num_available}(k={t.skill_k})' for t in fleet_model)}) "
+        f"owned={decision.owned_total}, util={decision.utilization:.1%}"
     )
-    print(f"cg fleet     : {[f'{t.name}(n={t.num_available},k={t.skill_k})' for t in fleet_cg]}")
+    print(
+        f"cg fleet     : {cg_total} vehicles, same tier mix, upgraded to k={fleet_cg[0].skill_k} "
+        f"({', '.join(f'{t.name}={t.num_available}' for t in fleet_cg)})"
+    )
     print()
 
     rows = []

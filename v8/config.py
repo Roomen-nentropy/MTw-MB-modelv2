@@ -16,7 +16,9 @@ class SimulationConfig(V7SimulationConfig):
     deployment_min_dispatch_rate: float = 0.92
     deployment_max_backlog_ratio: float = 0.08
     deployment_eval_periods: int = 24
-    deployment_min_utilization: float = 0.50
+    # 0.0 = no utilization floor; search from one vehicle per tier upward.
+    deployment_min_utilization: float = 0.0
     deployment_max_utilization: float = 1.0
-    deployment_utilization_step: float = 0.05
+    # >= 1: step in whole vehicles when enumerating deployment candidates.
+    deployment_utilization_step: float = 1.0
 

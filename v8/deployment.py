@@ -68,6 +68,36 @@ def _allocate_total_across_tiers(
     return [replace(t, num_available=n) for t, n in zip(owned_fleet, deployed)]
 
 
+def _deployment_candidate_totals(
+    owned_fleet: Sequence[FleetTierConfig],
+    owned_total: int,
+    *,
+    min_utilization: float,
+    max_utilization: float,
+    utilization_step: float,
+) -> List[int]:
+    """Enumerate active fleet sizes to evaluate (whole vehicles, owned-tier mix)."""
+    num_tiers = len(owned_fleet)
+    min_vehicles = num_tiers
+    if min_utilization > 0.0:
+        min_vehicles = max(min_vehicles, int(round(owned_total * min_utilization)))
+    max_vehicles = owned_total
+    if max_utilization < 1.0:
+        max_vehicles = min(max_vehicles, max(num_tiers, int(round(owned_total * max_utilization))))
+
+    if utilization_step >= 1.0:
+        step = max(1, int(round(utilization_step)))
+        return list(range(min_vehicles, max_vehicles + 1, step))
+
+    candidates: List[int] = []
+    util = max(0.0, min_utilization)
+    while util <= max_utilization + 1e-9:
+        n = max(num_tiers, min(owned_total, int(round(owned_total * util))))
+        candidates.append(n)
+        util += utilization_step
+    return sorted(set(candidates))
+
+
 def choose_optimal_deployment(
     config: SimulationConfig,
     owned_fleet: Sequence[FleetTierConfig],
@@ -96,13 +126,13 @@ def choose_optimal_deployment(
     owned_total = sum(t.num_available for t in owned_fleet)
     eval_periods = max(1, min(eval_periods_in, int(config.total_periods)))
 
-    candidates: List[int] = []
-    util = min_util_in
-    while util <= max_util_in + 1e-9:
-        n = max(len(owned_fleet), min(owned_total, int(round(owned_total * util))))
-        candidates.append(n)
-        util += util_step_in
-    candidates = sorted(set(candidates))
+    candidates = _deployment_candidate_totals(
+        owned_fleet,
+        owned_total,
+        min_utilization=min_util_in,
+        max_utilization=max_util_in,
+        utilization_step=util_step_in,
+    )
 
     best_feasible: Tuple[float, int, Dict[str, float], List[FleetTierConfig]] | None = None
     best_fallback: Tuple[Tuple[float, float, float], int, Dict[str, float], List[FleetTierConfig]] | None = None
